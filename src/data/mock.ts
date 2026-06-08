@@ -113,6 +113,22 @@ export const initialTasks: Task[] = [
     estimatedHours: 12,
     actualHours: 7.5,
     createdAt: "2026-06-01T09:00:00Z",
+    comments: [
+      {
+        id: "cmt-1",
+        authorId: "emp-2",
+        authorName: "Marcus Johnson",
+        text: "Started wireframes for the new welcome screen.",
+        createdAt: "2026-06-03T10:00:00Z",
+      },
+      {
+        id: "cmt-2",
+        authorId: "emp-1",
+        authorName: "Sarah Chen",
+        text: "Looks great — let's align on copy before dev handoff.",
+        createdAt: "2026-06-04T14:30:00Z",
+      },
+    ],
   },
   {
     id: "task-2",
@@ -125,6 +141,15 @@ export const initialTasks: Task[] = [
     estimatedHours: 8,
     actualHours: 5,
     createdAt: "2026-06-02T10:30:00Z",
+    comments: [
+      {
+        id: "cmt-3",
+        authorId: "emp-1",
+        authorName: "Sarah Chen",
+        text: "Redis sliding window approach implemented for /api/v1 routes.",
+        createdAt: "2026-06-06T16:00:00Z",
+      },
+    ],
   },
   {
     id: "task-3",
@@ -138,6 +163,8 @@ export const initialTasks: Task[] = [
     actualHours: 3.5,
     createdAt: "2026-05-28T14:00:00Z",
     completedAt: "2026-06-07T16:30:00Z",
+    completionNote: "All Q2 campaigns analyzed. Key insight: email outperformed social by 2.3x ROI.",
+    comments: [],
   },
   {
     id: "task-4",
@@ -150,6 +177,7 @@ export const initialTasks: Task[] = [
     estimatedHours: 16,
     actualHours: 14,
     createdAt: "2026-05-25T08:00:00Z",
+    comments: [],
   },
   {
     id: "task-5",
@@ -162,6 +190,7 @@ export const initialTasks: Task[] = [
     estimatedHours: 6,
     actualHours: 0,
     createdAt: "2026-06-05T11:00:00Z",
+    comments: [],
   },
   {
     id: "task-6",
@@ -174,6 +203,7 @@ export const initialTasks: Task[] = [
     estimatedHours: 3,
     actualHours: 0,
     createdAt: "2026-06-07T15:00:00Z",
+    comments: [],
   },
   {
     id: "task-7",
@@ -187,6 +217,8 @@ export const initialTasks: Task[] = [
     actualHours: 9,
     createdAt: "2026-05-20T09:00:00Z",
     completedAt: "2026-06-07T11:00:00Z",
+    completionNote: "Build times reduced from 8min to 4.5min using Turborepo remote cache.",
+    comments: [],
   },
   {
     id: "task-8",
@@ -199,6 +231,7 @@ export const initialTasks: Task[] = [
     estimatedHours: 5,
     actualHours: 2,
     createdAt: "2026-06-03T13:00:00Z",
+    comments: [],
   },
 ];
 

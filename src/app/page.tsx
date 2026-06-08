@@ -15,8 +15,8 @@ import { Card, CardContent, CardHeader } from "@/components/ui/Card";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 
 function DashboardContent() {
-  const { stats, tasks, employees } = useApp();
-  const inProgressTasks = tasks.filter((t) => t.status === "in-progress").length;
+  const { stats, visibleTasks, employees } = useApp();
+  const inProgressTasks = visibleTasks.filter((t) => t.status === "in-progress").length;
   const topPerformers = [...employees]
     .sort((a, b) => b.performanceScore - a.performanceScore)
     .slice(0, 4);
@@ -75,7 +75,7 @@ function DashboardContent() {
                 <span className="text-zinc-500">Tasks in progress</span>
                 <span className="font-medium text-zinc-200">{inProgressTasks}</span>
               </div>
-              <ProgressBar value={inProgressTasks} max={tasks.length} color="violet" />
+              <ProgressBar value={inProgressTasks} max={visibleTasks.length || 1} color="violet" />
             </div>
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
@@ -106,10 +106,19 @@ function DashboardContent() {
   );
 }
 
-export default function DashboardPage() {
+function DashboardPageInner() {
+  const { getEmployeeById, currentEmployeeId, role } = useApp();
+  const user = getEmployeeById(currentEmployeeId);
   return (
-    <AppShell title="Dashboard" subtitle="Welcome back, Sarah">
+    <AppShell
+      title="Dashboard"
+      subtitle={`Welcome back, ${user?.name?.split(" ")[0] ?? "there"} · ${role} view`}
+    >
       <DashboardContent />
     </AppShell>
   );
+}
+
+export default function DashboardPage() {
+  return <DashboardPageInner />;
 }

@@ -1,6 +1,8 @@
 "use client";
 
+import { Download } from "lucide-react";
 import { useApp } from "@/context/AppProvider";
+import { Button } from "@/components/ui/Button";
 import { formatDate, formatTime } from "@/lib/utils";
 import { Badge } from "@/components/ui/Badge";
 import { Card, CardContent, CardHeader } from "@/components/ui/Card";
@@ -16,16 +18,24 @@ const statusVariant: Record<
 };
 
 export function AttendanceHistory() {
-  const { attendance, getEmployeeById } = useApp();
-  const sorted = [...attendance].sort(
+  const { visibleAttendance, getEmployeeById, exportAttendance } = useApp();
+  const sorted = [...visibleAttendance].sort(
     (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
   );
 
   return (
     <Card>
       <CardHeader>
-        <h3 className="font-semibold text-zinc-100">Attendance History</h3>
-        <p className="mt-0.5 text-sm text-zinc-500">Recent clock-in records</p>
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <h3 className="font-semibold text-zinc-100">Attendance History</h3>
+            <p className="mt-0.5 text-sm text-zinc-500">Recent clock-in records</p>
+          </div>
+          <Button variant="secondary" size="sm" onClick={exportAttendance}>
+            <Download className="h-3.5 w-3.5" />
+            Export CSV
+          </Button>
+        </div>
       </CardHeader>
       <CardContent className="p-0">
         <div className="overflow-x-auto">

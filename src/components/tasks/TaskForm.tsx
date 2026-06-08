@@ -1,32 +1,49 @@
 "use client";
 
 import { useState } from "react";
-import type { CreateTaskInput, TaskPriority } from "@/types";
+import type { CreateTaskInput, Task, TaskPriority, TaskStatus } from "@/types";
 import { useApp } from "@/context/AppProvider";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
 
 interface TaskFormProps {
+  task?: Task;
   onSuccess: () => void;
   onCancel: () => void;
 }
 
-export function TaskForm({ onSuccess, onCancel }: TaskFormProps) {
-  const { employees, createTask } = useApp();
-  const [form, setForm] = useState<CreateTaskInput>({
-    title: "",
-    description: "",
-    assigneeId: employees[0]?.id ?? "",
-    priority: "medium",
-    dueDate: new Date().toISOString().split("T")[0],
-    estimatedHours: 4,
+export function TaskForm({ task, onSuccess, onCancel }: TaskFormProps) {
+  const { employees, createTask, updateTask } = useApp();
+  const isEdit = !!task;
+
+  const [form, setForm] = useState({
+    title: task?.title ?? "",
+    description: task?.description ?? "",
+    assigneeId: task?.assigneeId ?? employees[0]?.id ?? "",
+    priority: (task?.priority ?? "medium") as TaskPriority,
+    status: (task?.status ?? "todo") as TaskStatus,
+    dueDate: task?.dueDate ?? new Date().toISOString().split("T")[0],
+    estimatedHours: task?.estimatedHours ?? 4,
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.title.trim()) return;
-    createTask(form);
+
+    if (isEdit && task) {
+      updateTask(task.id, form);
+    } else {
+      const input: CreateTaskInput = {
+        title: form.title,
+        description: form.description,
+        assigneeId: form.assigneeId,
+        priority: form.priority,
+        dueDate: form.dueDate,
+        estimatedHours: form.estimatedHours,
+      };
+      createTask(input);
+    }
     onSuccess();
   };
 
@@ -40,9 +57,7 @@ export function TaskForm({ onSuccess, onCancel }: TaskFormProps) {
         required
       />
       <div className="space-y-1.5">
-        <label className="block text-sm font-medium text-zinc-400">
-          Description
-        </label>
+        <label className="block text-sm font-medium text-zinc-400">Description</label>
         <textarea
           value={form.description}
           onChange={(e) => setForm({ ...form, description: e.target.value })}
@@ -71,28 +86,54 @@ export function TaskForm({ onSuccess, onCancel }: TaskFormProps) {
             { value: "urgent", label: "Urgent" },
           ]}
         />
+        {isEdit ? (
+          <Select
+            label="Status"
+            value={form.status}
+            onChange={(e) =>
+              setForm({ ...form, status: e.target.value as TaskStatus })
+            }
+            options={[
+              { value: "todo", label: "To Do" },
+              { value: "in-progress", label: "In Progress" },
+              { value: "review", label: "Review" },
+              { value: "done", label: "Done" },
+            ]}
+          />
+        ) : (
+          <Input
+            label="Due Date"
+            type="date"
+            value={form.dueDate}
+            onChange={(e) => setForm({ ...form, dueDate: e.target.value })}
+          />
+        )}
+      </div>
+      <div className="grid grid-cols-2 gap-4">
+        {isEdit && (
+          <Input
+            label="Due Date"
+            type="date"
+            value={form.dueDate}
+            onChange={(e) => setForm({ ...form, dueDate: e.target.value })}
+          />
+        )}
         <Input
-          label="Due Date"
-          type="date"
-          value={form.dueDate}
-          onChange={(e) => setForm({ ...form, dueDate: e.target.value })}
+          label="Estimated Hours"
+          type="number"
+          min={0.5}
+          step={0.5}
+          value={form.estimatedHours}
+          onChange={(e) =>
+            setForm({ ...form, estimatedHours: parseFloat(e.target.value) || 0 })
+          }
         />
       </div>
-      <Input
-        label="Estimated Hours"
-        type="number"
-        min={0.5}
-        step={0.5}
-        value={form.estimatedHours}
-        onChange={(e) =>
-          setForm({ ...form, estimatedHours: parseFloat(e.target.value) || 0 })
-        }
-      />
       <div className="flex justify-end gap-2 pt-2">
         <Button type="button" variant="secondary" onClick={onCancel}>
           Cancel
         </Button>
-        <Button type="submit">Create Task</Button>
+        <Button type="submit">{isEdit ? "Save Changes" : "Create Task"}</Button>
       </div>
     </form>
   );

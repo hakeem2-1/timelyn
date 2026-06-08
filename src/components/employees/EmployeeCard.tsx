@@ -1,4 +1,5 @@
-import { Mail } from "lucide-react";
+import { ArrowRight, Mail } from "lucide-react";
+import Link from "next/link";
 import type { Employee } from "@/types";
 import { Avatar } from "@/components/ui/Avatar";
 import { Badge } from "@/components/ui/Badge";
@@ -28,13 +29,14 @@ interface EmployeeCardProps {
 
 export function EmployeeCard({ employee }: EmployeeCardProps) {
   return (
-    <Card hover>
+    <Link href={`/employees/${employee.id}`}>
+      <Card hover className="h-full">
       <CardContent className="space-y-4">
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-3">
             <Avatar initials={employee.avatar} size="lg" />
             <div>
-              <h3 className="font-semibold text-zinc-100">{employee.name}</h3>
+              <h3 className="font-semibold text-zinc-100 group-hover:text-violet-300">{employee.name}</h3>
               <p className="text-sm text-zinc-500">{employee.role}</p>
             </div>
           </div>
@@ -68,11 +70,15 @@ export function EmployeeCard({ employee }: EmployeeCardProps) {
           />
         </div>
 
-        <div className="flex items-center gap-2 border-t border-zinc-800/60 pt-3 text-xs text-zinc-500">
-          <Mail className="h-3.5 w-3.5" />
-          {employee.email}
+        <div className="flex items-center justify-between border-t border-zinc-800/60 pt-3 text-xs text-zinc-500">
+          <span className="flex items-center gap-2">
+            <Mail className="h-3.5 w-3.5" />
+            {employee.email}
+          </span>
+          <ArrowRight className="h-3.5 w-3.5 text-zinc-600" />
         </div>
       </CardContent>
     </Card>
+    </Link>
   );
 }

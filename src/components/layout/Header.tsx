@@ -1,8 +1,10 @@
 "use client";
 
 import { Bell, Menu, Search } from "lucide-react";
+import Link from "next/link";
 import { useApp } from "@/context/AppProvider";
 import { Avatar } from "@/components/ui/Avatar";
+import { RoleSwitcher } from "./RoleSwitcher";
 
 interface HeaderProps {
   title: string;
@@ -11,7 +13,7 @@ interface HeaderProps {
 }
 
 export function Header({ title, subtitle, onMenuClick }: HeaderProps) {
-  const { getEmployeeById, currentEmployeeId } = useApp();
+  const { getEmployeeById, currentEmployeeId, role } = useApp();
   const currentUser = getEmployeeById(currentEmployeeId);
 
   return (
@@ -35,6 +37,7 @@ export function Header({ title, subtitle, onMenuClick }: HeaderProps) {
       </div>
 
       <div className="flex items-center gap-2 sm:gap-3">
+        <RoleSwitcher />
         <div className="hidden items-center gap-2 rounded-lg border border-zinc-800 bg-zinc-900/50 px-3 py-1.5 md:flex">
           <Search className="h-4 w-4 text-zinc-500" />
           <input
@@ -50,15 +53,20 @@ export function Header({ title, subtitle, onMenuClick }: HeaderProps) {
           <Bell className="h-5 w-5" />
           <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-violet-500" />
         </button>
-        <div className="flex items-center gap-2.5 rounded-lg py-1 pl-1 pr-3 transition-colors hover:bg-zinc-800/50">
+        <Link
+          href={`/employees/${currentEmployeeId}`}
+          className="flex items-center gap-2.5 rounded-lg py-1 pl-1 pr-3 transition-colors hover:bg-zinc-800/50"
+        >
           <Avatar initials={currentUser?.avatar ?? "SC"} size="sm" />
           <div className="hidden sm:block">
             <p className="text-sm font-medium text-zinc-200">
               {currentUser?.name ?? "Sarah Chen"}
             </p>
-            <p className="text-xs text-zinc-500">{currentUser?.role}</p>
+            <p className="text-xs text-zinc-500 capitalize">
+              {role} · {currentUser?.role}
+            </p>
           </div>
-        </div>
+        </Link>
       </div>
     </header>
   );

@@ -3,6 +3,8 @@ export type EmployeeStatus = "active" | "away" | "offline" | "on-leave";
 export type TaskStatus = "todo" | "in-progress" | "review" | "done";
 export type TaskPriority = "low" | "medium" | "high" | "urgent";
 
+export type UserRole = "admin" | "employee";
+
 export type AttendanceAction = "clock-in" | "clock-out" | "break-start" | "break-end";
 
 export interface Employee {
@@ -17,6 +19,14 @@ export interface Employee {
   joinedAt: string;
 }
 
+export interface TaskComment {
+  id: string;
+  authorId: string;
+  authorName: string;
+  text: string;
+  createdAt: string;
+}
+
 export interface Task {
   id: string;
   title: string;
@@ -29,6 +39,8 @@ export interface Task {
   actualHours: number;
   createdAt: string;
   completedAt?: string;
+  completionNote?: string;
+  comments: TaskComment[];
 }
 
 export interface AttendanceRecord {
@@ -43,12 +55,17 @@ export interface AttendanceRecord {
   status: "present" | "absent" | "partial" | "on-break";
 }
 
+export type ActivityEntityType = "task" | "employee" | "attendance";
+
 export interface ActivityItem {
   id: string;
-  type: "task" | "attendance" | "employee" | "milestone";
+  type: "task" | "attendance" | "employee" | "milestone" | "comment";
   message: string;
   employeeName: string;
+  employeeId?: string;
   timestamp: string;
+  entityId?: string;
+  entityType?: ActivityEntityType;
 }
 
 export interface GrowthInsight {
@@ -77,10 +94,43 @@ export interface CreateTaskInput {
   estimatedHours: number;
 }
 
+export interface UpdateTaskInput {
+  title: string;
+  description: string;
+  assigneeId: string;
+  priority: TaskPriority;
+  status: TaskStatus;
+  dueDate: string;
+  estimatedHours: number;
+}
+
+export interface CreateEmployeeInput {
+  name: string;
+  email: string;
+  role: string;
+  department: string;
+  status: EmployeeStatus;
+  performanceScore: number;
+  joinedAt: string;
+}
+
+export interface UpdateEmployeeInput extends CreateEmployeeInput {}
+
 export interface AttendanceSession {
   clockedIn: boolean;
   onBreak: boolean;
   clockInTime: string | null;
   breakStartTime: string | null;
   todayRecordId: string | null;
+}
+
+export interface PersistedState {
+  version: number;
+  employees: Employee[];
+  tasks: Task[];
+  attendance: AttendanceRecord[];
+  activity: ActivityItem[];
+  session: AttendanceSession;
+  role: UserRole;
+  currentEmployeeId: string;
 }
