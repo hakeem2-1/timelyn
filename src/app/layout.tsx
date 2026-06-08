@@ -15,9 +15,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Timelyn — Employee Productivity Platform",
+  title: "Timelyn — Daily Task Sheets",
   description:
-    "Modern employee productivity and performance management platform for teams.",
+    "Daily employee task-sheet system for assigning, tracking, and reporting work.",
 };
 
 export default function RootLayout({

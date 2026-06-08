@@ -1,11 +1,9 @@
 export type EmployeeStatus = "active" | "away" | "offline" | "on-leave";
-
-export type TaskStatus = "todo" | "in-progress" | "review" | "done";
-export type TaskPriority = "low" | "medium" | "high" | "urgent";
-
 export type UserRole = "admin" | "employee";
 
-export type AttendanceAction = "clock-in" | "clock-out" | "break-start" | "break-end";
+export type SheetTaskStatus = "pending" | "in_progress" | "completed" | "blocked";
+export type SheetRarity = "common" | "uncommon" | "rare" | "critical";
+export type SheetUrgency = "low" | "medium" | "high" | "urgent";
 
 export interface Employee {
   id: string;
@@ -13,95 +11,63 @@ export interface Employee {
   email: string;
   role: string;
   department: string;
-  status: EmployeeStatus;
-  performanceScore: number;
   avatar: string;
-  joinedAt: string;
+  status: EmployeeStatus;
 }
 
-export interface TaskComment {
+export interface SheetTask {
   id: string;
-  authorId: string;
-  authorName: string;
-  text: string;
-  createdAt: string;
-}
-
-export interface Task {
-  id: string;
+  taskNumber: number;
   title: string;
   description: string;
-  assigneeId: string;
-  priority: TaskPriority;
-  status: TaskStatus;
-  dueDate: string;
-  estimatedHours: number;
-  actualHours: number;
-  createdAt: string;
+  adminNotes: string;
+  referenceImageUrl?: string;
+  rarity: SheetRarity;
+  urgency: SheetUrgency;
+  status: SheetTaskStatus;
+  employeeNotes: string;
+  completionNote: string;
+  assignedAt: string;
+  updatedAt: string;
   completedAt?: string;
-  completionNote?: string;
-  comments: TaskComment[];
 }
 
-export interface AttendanceRecord {
+export interface DailySheet {
   id: string;
   employeeId: string;
   date: string;
-  clockIn?: string;
-  clockOut?: string;
-  breakStart?: string;
-  breakEnd?: string;
-  totalHours: number;
-  status: "present" | "absent" | "partial" | "on-break";
+  tasks: SheetTask[];
+  todDraft: string;
+  eodDraft: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
-export type ActivityEntityType = "task" | "employee" | "attendance";
-
-export interface ActivityItem {
-  id: string;
-  type: "task" | "attendance" | "employee" | "milestone" | "comment";
-  message: string;
-  employeeName: string;
-  employeeId?: string;
-  timestamp: string;
-  entityId?: string;
-  entityType?: ActivityEntityType;
+export interface SheetSummary {
+  date: string;
+  total: number;
+  completed: number;
+  pending: number;
+  inProgress: number;
+  blocked: number;
+  productivity: number;
 }
 
-export interface GrowthInsight {
-  employeeId: string;
-  strengths: string[];
-  weakAreas: string[];
-  consistencyScore: number;
-  deadlineAccuracy: number;
-  suggestions: string[];
-}
-
-export interface AnalyticsData {
-  productivityByDay: { day: string; score: number }[];
-  hoursByDay: { day: string; hours: number }[];
-  taskCompletionTrend: { week: string; completed: number; created: number }[];
-  attendancePercentage: number;
-  teamPerformance: { department: string; score: number }[];
-}
-
-export interface CreateTaskInput {
+export interface CreateSheetTaskInput {
   title: string;
   description: string;
-  assigneeId: string;
-  priority: TaskPriority;
-  dueDate: string;
-  estimatedHours: number;
+  adminNotes: string;
+  referenceImageUrl?: string;
+  rarity: SheetRarity;
+  urgency: SheetUrgency;
 }
 
-export interface UpdateTaskInput {
-  title: string;
-  description: string;
-  assigneeId: string;
-  priority: TaskPriority;
-  status: TaskStatus;
-  dueDate: string;
-  estimatedHours: number;
+export interface UpdateSheetTaskAdminInput extends CreateSheetTaskInput {}
+
+export interface UpdateSheetTaskEmployeeInput {
+  status?: SheetTaskStatus;
+  employeeNotes?: string;
+  completionNote?: string;
 }
 
 export interface CreateEmployeeInput {
@@ -110,27 +76,42 @@ export interface CreateEmployeeInput {
   role: string;
   department: string;
   status: EmployeeStatus;
-  performanceScore: number;
-  joinedAt: string;
 }
 
 export interface UpdateEmployeeInput extends CreateEmployeeInput {}
 
-export interface AttendanceSession {
-  clockedIn: boolean;
-  onBreak: boolean;
-  clockInTime: string | null;
-  breakStartTime: string | null;
-  todayRecordId: string | null;
+export type ActivityEntityType = "sheet" | "employee" | "task";
+
+export interface ActivityItem {
+  id: string;
+  type: "sheet" | "task" | "employee" | "milestone";
+  message: string;
+  employeeName: string;
+  employeeId?: string;
+  timestamp: string;
+  entityId?: string;
+  entityType?: ActivityEntityType;
 }
 
 export interface PersistedState {
   version: number;
   employees: Employee[];
-  tasks: Task[];
-  attendance: AttendanceRecord[];
+  dailySheets: DailySheet[];
   activity: ActivityItem[];
-  session: AttendanceSession;
   role: UserRole;
   currentEmployeeId: string;
+}
+
+/** @deprecated Legacy shape for v2 migration only */
+export interface LegacyTask {
+  id: string;
+  title: string;
+  description: string;
+  assigneeId: string;
+  priority?: string;
+  status?: string;
+  dueDate?: string;
+  createdAt?: string;
+  completedAt?: string;
+  completionNote?: string;
 }

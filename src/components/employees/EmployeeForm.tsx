@@ -32,8 +32,6 @@ export function EmployeeForm({ employee, onSuccess, onCancel }: EmployeeFormProp
     role: employee?.role ?? "",
     department: employee?.department ?? DEPARTMENTS[0],
     status: employee?.status ?? "active",
-    performanceScore: employee?.performanceScore ?? 80,
-    joinedAt: employee?.joinedAt ?? new Date().toISOString().split("T")[0],
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -54,7 +52,6 @@ export function EmployeeForm({ employee, onSuccess, onCancel }: EmployeeFormProp
         label="Full Name"
         value={form.name}
         onChange={(e) => setForm({ ...form, name: e.target.value })}
-        placeholder="Jane Doe"
         required
       />
       <Input
@@ -62,14 +59,12 @@ export function EmployeeForm({ employee, onSuccess, onCancel }: EmployeeFormProp
         type="email"
         value={form.email}
         onChange={(e) => setForm({ ...form, email: e.target.value })}
-        placeholder="jane@timelyn.io"
         required
       />
       <Input
         label="Job Title"
         value={form.role}
         onChange={(e) => setForm({ ...form, role: e.target.value })}
-        placeholder="Software Engineer"
         required
       />
       <div className="grid grid-cols-2 gap-4">
@@ -91,24 +86,6 @@ export function EmployeeForm({ employee, onSuccess, onCancel }: EmployeeFormProp
             { value: "offline", label: "Offline" },
             { value: "on-leave", label: "On Leave" },
           ]}
-        />
-      </div>
-      <div className="grid grid-cols-2 gap-4">
-        <Input
-          label="Performance Score"
-          type="number"
-          min={0}
-          max={100}
-          value={form.performanceScore}
-          onChange={(e) =>
-            setForm({ ...form, performanceScore: Number(e.target.value) || 0 })
-          }
-        />
-        <Input
-          label="Joined Date"
-          type="date"
-          value={form.joinedAt}
-          onChange={(e) => setForm({ ...form, joinedAt: e.target.value })}
         />
       </div>
       <div className="flex justify-end gap-2 pt-2">

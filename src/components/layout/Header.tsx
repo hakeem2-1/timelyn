@@ -54,7 +54,7 @@ export function Header({ title, subtitle, onMenuClick }: HeaderProps) {
           <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-violet-500" />
         </button>
         <Link
-          href={`/employees/${currentEmployeeId}`}
+          href={role === "admin" ? `/employees/${currentEmployeeId}` : "/tasks"}
           className="flex items-center gap-2.5 rounded-lg py-1 pl-1 pr-3 transition-colors hover:bg-zinc-800/50"
         >
           <Avatar initials={currentUser?.avatar ?? "SC"} size="sm" />

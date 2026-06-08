@@ -1,95 +1,86 @@
-import {
-  employees as mockEmployees,
-  initialActivity,
-  initialAttendance,
-  initialTasks,
-} from "@/data/mock";
-import { getTodayISO } from "@/lib/utils";
+import { employees as mockEmployees, initialActivity, seedDailySheets } from "@/data/mock";
+import { migrateLegacyTasksToSheets } from "@/lib/sheets";
 import type {
   ActivityItem,
-  AttendanceRecord,
-  AttendanceSession,
+  DailySheet,
   Employee,
+  LegacyTask,
   PersistedState,
-  Task,
 } from "@/types";
 
 export const STORAGE_KEY = "timelyn-app-state";
-export const STORAGE_VERSION = 2;
+export const STORAGE_VERSION = 3;
 const DEFAULT_EMPLOYEE_ID = "emp-1";
 
-function migrateTask(task: Task): Task {
-  return {
-    ...task,
-    comments: task.comments ?? [],
-  };
-}
-
-function buildDefaultSession(
-  attendance: AttendanceRecord[],
-  employeeId: string
-): AttendanceSession {
-  const today = getTodayISO();
-  const record = attendance.find(
-    (a) => a.employeeId === employeeId && a.date === today
-  );
-  return {
-    clockedIn: !!record?.clockIn && !record?.clockOut,
-    onBreak: !!record?.breakStart && !record?.breakEnd,
-    clockInTime: record?.clockIn ?? null,
-    breakStartTime: record?.breakStart ?? null,
-    todayRecordId: record?.id ?? null,
-  };
+interface LegacyPersistedV2 {
+  version: number;
+  employees?: Employee[];
+  tasks?: LegacyTask[];
+  dailySheets?: DailySheet[];
+  activity?: ActivityItem[];
+  role?: PersistedState["role"];
+  currentEmployeeId?: string;
 }
 
 export function getDefaultState(): PersistedState {
   return {
     version: STORAGE_VERSION,
     employees: mockEmployees,
-    tasks: initialTasks.map(migrateTask),
-    attendance: initialAttendance,
+    dailySheets: seedDailySheets,
     activity: initialActivity,
-    session: buildDefaultSession(initialAttendance, DEFAULT_EMPLOYEE_ID),
     role: "admin",
     currentEmployeeId: DEFAULT_EMPLOYEE_ID,
   };
 }
 
-function isValidPersistedState(value: unknown): value is PersistedState {
-  if (!value || typeof value !== "object") return false;
-  const state = value as PersistedState;
-  return (
-    typeof state.version === "number" &&
-    Array.isArray(state.tasks) &&
-    Array.isArray(state.attendance) &&
-    Array.isArray(state.activity) &&
-    typeof state.session === "object" &&
-    (state.role === "admin" || state.role === "employee") &&
-    typeof state.currentEmployeeId === "string"
-  );
+function isLegacyState(value: unknown): value is LegacyPersistedV2 {
+  return !!value && typeof value === "object";
 }
 
-function migratePersistedState(parsed: PersistedState): PersistedState {
-  const employees: Employee[] =
-    Array.isArray(parsed.employees) && parsed.employees.length > 0
-      ? parsed.employees
-      : mockEmployees;
+function migrateEmployees(parsed: LegacyPersistedV2): Employee[] {
+  if (Array.isArray(parsed.employees) && parsed.employees.length > 0) {
+    return parsed.employees.map((e) => ({
+      id: e.id,
+      name: e.name,
+      email: e.email,
+      role: e.role,
+      department: e.department,
+      avatar: e.avatar,
+      status: e.status,
+    }));
+  }
+  return mockEmployees;
+}
 
-  const tasks = parsed.tasks.map(migrateTask);
-  const session =
-    parsed.session ??
-    buildDefaultSession(parsed.attendance, parsed.currentEmployeeId);
+function migrateSheets(parsed: LegacyPersistedV2, employees: Employee[]): DailySheet[] {
+  if (Array.isArray(parsed.dailySheets) && parsed.dailySheets.length > 0) {
+    return parsed.dailySheets;
+  }
 
+  if (Array.isArray(parsed.tasks) && parsed.tasks.length > 0) {
+    const migrated = migrateLegacyTasksToSheets(
+      parsed.tasks,
+      employees.map((e) => e.id)
+    );
+    if (migrated.length > 0) return migrated;
+  }
+
+  return seedDailySheets;
+}
+
+function migratePersistedState(parsed: LegacyPersistedV2): PersistedState {
+  const employees = migrateEmployees(parsed);
+  const dailySheets = migrateSheets(parsed, employees);
   const currentEmployeeId = employees.some((e) => e.id === parsed.currentEmployeeId)
-    ? parsed.currentEmployeeId
+    ? (parsed.currentEmployeeId as string)
     : employees[0]?.id ?? DEFAULT_EMPLOYEE_ID;
 
   return {
-    ...parsed,
     version: STORAGE_VERSION,
     employees,
-    tasks,
-    session: buildDefaultSession(parsed.attendance, currentEmployeeId),
+    dailySheets,
+    activity: Array.isArray(parsed.activity) ? parsed.activity : initialActivity,
+    role: parsed.role === "employee" ? "employee" : "admin",
     currentEmployeeId,
   };
 }
@@ -102,7 +93,11 @@ export function loadPersistedState(): PersistedState {
     if (!raw) return getDefaultState();
 
     const parsed: unknown = JSON.parse(raw);
-    if (!isValidPersistedState(parsed)) return getDefaultState();
+    if (!isLegacyState(parsed)) return getDefaultState();
+
+    if (parsed.version === STORAGE_VERSION && Array.isArray(parsed.dailySheets)) {
+      return migratePersistedState(parsed);
+    }
 
     return migratePersistedState(parsed);
   } catch {
@@ -119,7 +114,7 @@ export function savePersistedState(state: PersistedState): void {
       JSON.stringify({ ...state, version: STORAGE_VERSION })
     );
   } catch {
-    // Quota exceeded or private browsing — fail silently
+    // Quota exceeded or private browsing
   }
 }
 

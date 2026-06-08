@@ -1,26 +1,10 @@
 "use client";
 
-import {
-  BarChart3,
-  CheckSquare,
-  Clock,
-  LayoutDashboard,
-  Sparkles,
-  Users,
-  X,
-} from "lucide-react";
+import { CheckSquare, ClipboardList, Users, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useApp } from "@/context/AppProvider";
 import { cn } from "@/lib/utils";
-
-const navItems = [
-  { href: "/", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/employees", label: "Employees", icon: Users },
-  { href: "/tasks", label: "Tasks", icon: CheckSquare },
-  { href: "/attendance", label: "Attendance", icon: Clock },
-  { href: "/analytics", label: "Analytics", icon: BarChart3 },
-  { href: "/growth", label: "Growth Insights", icon: Sparkles },
-];
 
 interface SidebarProps {
   open?: boolean;
@@ -29,6 +13,17 @@ interface SidebarProps {
 
 export function Sidebar({ open, onClose }: SidebarProps) {
   const pathname = usePathname();
+  const { isAdmin } = useApp();
+
+  const navItems = isAdmin
+    ? [
+        { href: "/", label: "Team Overview", icon: Users },
+        { href: "/employees", label: "Employees", icon: ClipboardList },
+      ]
+    : [
+        { href: "/", label: "Today's Sheet", icon: CheckSquare },
+        { href: "/tasks", label: "My Sheet", icon: ClipboardList },
+      ];
 
   return (
     <>
@@ -48,7 +43,7 @@ export function Sidebar({ open, onClose }: SidebarProps) {
         <div className="flex h-16 items-center justify-between border-b border-zinc-800/80 px-5">
           <Link href="/" className="flex items-center gap-2.5" onClick={onClose}>
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-violet-600 to-indigo-600 shadow-lg shadow-violet-600/20">
-              <Clock className="h-4 w-4 text-white" />
+              <ClipboardList className="h-4 w-4 text-white" />
             </div>
             <span className="text-lg font-semibold tracking-tight text-zinc-100">
               Timelyn
@@ -95,9 +90,9 @@ export function Sidebar({ open, onClose }: SidebarProps) {
 
         <div className="border-t border-zinc-800/80 p-4">
           <div className="rounded-lg bg-gradient-to-br from-violet-600/10 to-indigo-600/10 p-3 ring-1 ring-violet-500/20">
-            <p className="text-xs font-medium text-violet-300">Pro Plan</p>
+            <p className="text-xs font-medium text-violet-300">Daily Sheets</p>
             <p className="mt-0.5 text-xs text-zinc-500">
-              8 team members · Unlimited tasks
+              {isAdmin ? "Assign & review team sheets" : "Update your daily sheet"}
             </p>
           </div>
         </div>
