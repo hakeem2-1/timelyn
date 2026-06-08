@@ -1,65 +1,115 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import {
+  CheckCircle2,
+  Clock,
+  TrendingUp,
+  Users,
+  UserCheck,
+} from "lucide-react";
+import { useApp } from "@/context/AppProvider";
+import { RecentActivity } from "@/components/dashboard/RecentActivity";
+import { AppShell } from "@/components/layout/AppShell";
+import { StatCard } from "@/components/ui/StatCard";
+import { Card, CardContent, CardHeader } from "@/components/ui/Card";
+import { ProgressBar } from "@/components/ui/ProgressBar";
+
+function DashboardContent() {
+  const { stats, tasks, employees } = useApp();
+  const inProgressTasks = tasks.filter((t) => t.status === "in-progress").length;
+  const topPerformers = [...employees]
+    .sort((a, b) => b.performanceScore - a.performanceScore)
+    .slice(0, 4);
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
+    <div className="space-y-6">
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-5">
+        <StatCard
+          title="Total Employees"
+          value={stats.totalEmployees}
+          icon={Users}
+          trend={{ value: 12, label: "vs last month" }}
+          iconColor="text-blue-400"
         />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+        <StatCard
+          title="Active Employees"
+          value={stats.activeEmployees}
+          subtitle={`${Math.round((stats.activeEmployees / stats.totalEmployees) * 100)}% of team`}
+          icon={UserCheck}
+          iconColor="text-emerald-400"
+        />
+        <StatCard
+          title="Tasks Completed Today"
+          value={stats.tasksCompletedToday}
+          icon={CheckCircle2}
+          trend={{ value: 8, label: "vs yesterday" }}
+          iconColor="text-violet-400"
+        />
+        <StatCard
+          title="Hours Worked Today"
+          value={`${stats.hoursWorkedToday}h`}
+          icon={Clock}
+          iconColor="text-indigo-400"
+        />
+        <StatCard
+          title="Productivity Score"
+          value={`${stats.productivityScore}%`}
+          icon={TrendingUp}
+          trend={{ value: 3.2, label: "this week" }}
+          iconColor="text-amber-400"
+        />
+      </div>
+
+      <div className="grid gap-6 lg:grid-cols-3">
+        <div className="lg:col-span-2">
+          <RecentActivity />
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+        <Card>
+          <CardHeader>
+            <h3 className="font-semibold text-zinc-100">Quick Overview</h3>
+            <p className="mt-0.5 text-sm text-zinc-500">Today&apos;s snapshot</p>
+          </CardHeader>
+          <CardContent className="space-y-5">
+            <div className="space-y-2">
+              <div className="flex justify-between text-sm">
+                <span className="text-zinc-500">Tasks in progress</span>
+                <span className="font-medium text-zinc-200">{inProgressTasks}</span>
+              </div>
+              <ProgressBar value={inProgressTasks} max={tasks.length} color="violet" />
+            </div>
+            <div className="space-y-2">
+              <div className="flex justify-between text-sm">
+                <span className="text-zinc-500">Team productivity</span>
+                <span className="font-medium text-zinc-200">{stats.productivityScore}%</span>
+              </div>
+              <ProgressBar value={stats.productivityScore} color="emerald" />
+            </div>
+            <div className="border-t border-zinc-800/60 pt-4">
+              <p className="mb-3 text-xs font-medium uppercase tracking-wider text-zinc-500">
+                Top Performers
+              </p>
+              <div className="space-y-3">
+                {topPerformers.map((emp) => (
+                  <div key={emp.id} className="flex items-center justify-between">
+                    <span className="text-sm text-zinc-300">{emp.name}</span>
+                    <span className="text-sm font-medium text-emerald-400">
+                      {emp.performanceScore}%
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
+  );
+}
+
+export default function DashboardPage() {
+  return (
+    <AppShell title="Dashboard" subtitle="Welcome back, Sarah">
+      <DashboardContent />
+    </AppShell>
   );
 }
