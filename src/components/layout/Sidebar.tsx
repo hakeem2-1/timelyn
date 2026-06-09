@@ -1,6 +1,7 @@
 "use client";
 
-import { CheckSquare, ClipboardList, Users, X } from "lucide-react";
+
+import { CheckSquare, ClipboardList, Clock, Users, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useApp } from "@/context/AppProvider";
@@ -15,15 +16,17 @@ export function Sidebar({ open, onClose }: SidebarProps) {
   const pathname = usePathname();
   const { isAdmin } = useApp();
 
-  const navItems = isAdmin
-    ? [
-        { href: "/", label: "Team Overview", icon: Users },
-        { href: "/employees", label: "Employees", icon: ClipboardList },
-      ]
-    : [
-        { href: "/", label: "Today's Sheet", icon: CheckSquare },
-        { href: "/tasks", label: "My Sheet", icon: ClipboardList },
-      ];
+const navItems = isAdmin
+  ? [
+      { href: "/", label: "Team Overview", icon: Users },
+      { href: "/employees", label: "Employees", icon: ClipboardList },
+      { href: "/attendance", label: "Attendance", icon: Clock },
+    ]
+  : [
+      { href: "/", label: "Today's Sheet", icon: CheckSquare },
+      { href: "/tasks", label: "My Sheet", icon: ClipboardList },
+      { href: "/attendance", label: "Attendance", icon: Clock },
+    ];
 
   return (
     <>

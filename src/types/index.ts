@@ -4,7 +4,38 @@ export type UserRole = "admin" | "employee";
 export type SheetTaskStatus = "pending" | "in_progress" | "completed" | "blocked";
 export type SheetRarity = "common" | "uncommon" | "rare" | "critical";
 export type SheetUrgency = "low" | "medium" | "high" | "urgent";
+export type AttendanceStatus =
+  | "not_started"
+  | "working"
+  | "on_break"
+  | "present"
+  | "late"
+  | "half_day"
+  | "absent";
 
+export type BreakEntry = {
+  id: string;
+  startTime: string;
+  endTime?: string;
+};
+
+export type AttendanceRecord = {
+  id: string;
+  employeeId: string;
+  date: string;
+  shiftStart: string;
+  shiftEnd: string;
+  requiredMinutes: number;
+  clockIn?: string;
+  clockOut?: string;
+  breaks: BreakEntry[];
+  breakMinutes: number;
+  workedMinutes: number;
+  status: AttendanceStatus;
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+};
 export interface Employee {
   id: string;
   name: string;
@@ -100,6 +131,7 @@ export interface PersistedState {
   activity: ActivityItem[];
   role: UserRole;
   currentEmployeeId: string;
+  attendance: AttendanceRecord[];
 }
 
 /** @deprecated Legacy shape for v2 migration only */

@@ -2,6 +2,7 @@ import { employees as mockEmployees, initialActivity, seedDailySheets } from "@/
 import { migrateLegacyTasksToSheets } from "@/lib/sheets";
 import type {
   ActivityItem,
+  AttendanceRecord,
   DailySheet,
   Employee,
   LegacyTask,
@@ -15,6 +16,7 @@ const DEFAULT_EMPLOYEE_ID = "emp-1";
 interface LegacyPersistedV2 {
   version: number;
   employees?: Employee[];
+  attendance?: AttendanceRecord[];
   tasks?: LegacyTask[];
   dailySheets?: DailySheet[];
   activity?: ActivityItem[];
@@ -27,9 +29,11 @@ export function getDefaultState(): PersistedState {
     version: STORAGE_VERSION,
     employees: mockEmployees,
     dailySheets: seedDailySheets,
+    attendance: [],
     activity: initialActivity,
     role: "admin",
     currentEmployeeId: DEFAULT_EMPLOYEE_ID,
+    
   };
 }
 
@@ -82,6 +86,7 @@ function migratePersistedState(parsed: LegacyPersistedV2): PersistedState {
     activity: Array.isArray(parsed.activity) ? parsed.activity : initialActivity,
     role: parsed.role === "employee" ? "employee" : "admin",
     currentEmployeeId,
+    attendance: Array.isArray(parsed.attendance) ? parsed.attendance : [],
   };
 }
 
